@@ -8,7 +8,7 @@ Created on Sun Mar 22 13:12:06 2020
 
 
 #quick script for monitoring peak flow 
-
+import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
 import argparse 
@@ -18,7 +18,7 @@ register_matplotlib_converters()
 
 
 
-def make_dataframe(quants = ['peakflow, spo2']):
+def make_dataframe(quants = ['peakflow', 'spo2']):
     """Make inital dataframe for the logging program"""
     columns = ['time'] + quants
     
@@ -26,21 +26,29 @@ def make_dataframe(quants = ['peakflow, spo2']):
     
     return df
 
+def add_col(df, col_name):
+    """adds empty column of data to befurther updated"""
+    df[col_name[0]] = np.array([np.nan for i in range(len(df))])
+
+
 def plot(df, save = True, show = True):
     """plots health history as pdf, will accept multiple keywords for variables 
     to plot """
     
+    
     fig, ax = plt.subplots(figsize=(10, 10))
     # Add x-axis and y-axis
     ax.set_xlim(df.index.values[0], df.index.values[-1])
-    ax.scatter(df.index.values,
-        df['peakflow'],
-        color='purple')
     
-    ax.plot(df.index.values,
-        df['peakflow'],
-        color='blue')
+    for i in df.keys()[1:]:
+        ax.scatter(df.index.values,
+            df[i])
+    
+        ax.plot(df.index.values,
+            df[i], label = i)
 
+    # add legend
+    ax.legend()
     
     if save == True:
         plt.savefig("plot.png")
@@ -70,14 +78,18 @@ parser.add_argument('--csv', action = 'store_true')
 parser.add_argument('--show', action = 'store_true')
 parser.add_argument('--deleteall', action = 'store_true')
 parser.add_argument('--confirm', action = 'store_true')
+parser.add_argument('--addcol', nargs = '+', type = str)
 
 def main():
     """main scripty for saving health information"""
     args = parser.parse_args()
     print(args)
     
-    df = pd.read_pickle("~/Health/AsthmaLogger/peakflow.pkl")
+    df = pd.read_pickle("./peakflow.pkl")
     
+    if (args.addcol != None):
+        add_col(df, args.addcol)
+        
     if (args.confirm == True) and (args.deleteall == True):
         deleteall(df)
         
@@ -90,7 +102,7 @@ def main():
     if args.csv:
         df.to_csv("peakflow.csv")
         
-    df.to_pickle("~/Health/AsthmaLogger/peakflow.pkl")
+    df.to_pickle("peakflow.pkl")
     
 
 if __name__ == "__main__":
