@@ -76,7 +76,7 @@ def main():
     args = parser.parse_args()
     print(args)
     
-    df = pd.read_pickle("./peakflow.pkl")
+    df = pd.read_pickle("~/Health/AsthmaLogger/peakflow.pkl")
     
     if (args.confirm == True) and (args.deleteall == True):
         deleteall(df)
@@ -90,7 +90,7 @@ def main():
     if args.csv:
         df.to_csv("peakflow.csv")
         
-    df.to_pickle("peakflow.pkl")
+    df.to_pickle("~/Health/AsthmaLogger/peakflow.pkl")
     
 
 if __name__ == "__main__":
